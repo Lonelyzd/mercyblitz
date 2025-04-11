@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.acme</groupId>
         <artifactId>biz-project</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>biz-core</artifactId>
@@ -15,7 +15,11 @@
         <dependency>
             <groupId>com.acme</groupId>
             <artifactId>biz-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
     <build>
