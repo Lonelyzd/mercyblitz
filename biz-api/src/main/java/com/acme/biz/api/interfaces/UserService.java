@@ -1,6 +1,7 @@
 package com.acme.biz.api.interfaces;
 
 import com.acme.biz.api.model.User;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  **/
 @FeignClient("${userservice.name}")
 @RequestMapping("/user")
+@DubboService
 public interface UserService {
 
     @PostMapping("/register")
