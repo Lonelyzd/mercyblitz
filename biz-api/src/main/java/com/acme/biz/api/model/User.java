@@ -2,6 +2,8 @@ package com.acme.biz.api.model;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * @author : IceBlue
  * @date : 2025/4/3 22:29
@@ -9,8 +11,10 @@ import lombok.Data;
 @Data
 public class User {
 
+    @NotNull
     private Long id;
 
+    @NotNull
     private String name;
 
     public Long getId() {
