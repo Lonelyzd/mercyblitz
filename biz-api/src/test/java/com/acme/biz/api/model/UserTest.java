@@ -1,5 +1,6 @@
 package com.acme.biz.api.model;
 
+import com.acme.biz.api.ApiRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.beanvalidation.LocaleContextMessageInterpolator;
 
@@ -27,9 +28,16 @@ public class UserTest {
         final Validator validator = validatorFactory.getValidator();
 
         User user=new User();
+        user.setName("aa");
 
-        final Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
+        ApiRequest<User> request = new ApiRequest<>();
+        request.setBody(user);
 
-        constraintViolations.forEach(cv->System.out.println(cv.getMessage()));
+
+        final Set<ConstraintViolation<ApiRequest<User>>> constraintViolations = validator.validate(request);
+
+        constraintViolations.forEach(cv->{
+            System.out.println(cv.getPropertyPath()+":"+cv.getMessage());
+        });
     }
 }
