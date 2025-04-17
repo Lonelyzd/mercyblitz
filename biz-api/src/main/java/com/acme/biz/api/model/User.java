@@ -1,10 +1,8 @@
 package com.acme.biz.api.model;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * @author : IceBlue
@@ -17,8 +15,6 @@ public class User {
     private Long id;
 
     @NotNull
-    @Email
-    @Size(min = 10)
     private String name;
 
     public Long getId() {

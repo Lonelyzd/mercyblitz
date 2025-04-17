@@ -18,7 +18,7 @@ public class UserTest  extends BaseTest {
     public void testValidateUser(){
 
         User user=new User();
-        user.setName("aa");
+//        user.setName("aa");
 
         ApiRequest<User> request = new ApiRequest<>();
         request.setBody(user);
