@@ -5,7 +5,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.xml.bind.ValidationException;
+import javax.validation.ValidationException;
+
 
 /**
  * @author : IceBlue
@@ -13,15 +14,12 @@ import javax.xml.bind.ValidationException;
  **/
 @RestControllerAdvice
 public class ExceptionConfiguration {
-
     @ExceptionHandler(ValidationException.class)
     public ApiResponse<?> onValidationException(ValidationException e) {
-
         return ApiResponse.failed(null, e.getLocalizedMessage());
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<?> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-
         return ApiResponse.failed(null, e.getLocalizedMessage());
     }
 }
