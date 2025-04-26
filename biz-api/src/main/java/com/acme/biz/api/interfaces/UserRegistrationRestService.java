@@ -1,7 +1,7 @@
 package com.acme.biz.api.interfaces;
 
-import com.acme.biz.api.ApiRequest;
-import com.acme.biz.api.ApiResponse;
+import com.acme.biz.api.HttpApiRequest;
+import com.acme.biz.api.HttpApiResponse;
 import com.acme.biz.api.model.User;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface UserRegistrationRestService {
 
     @PostMapping("/register/v1")
-    ApiResponse<Boolean> registerUser(@RequestBody @Validated User user);
+    HttpApiResponse<Boolean> registerUser(@RequestBody @Validated User user);
 
     @PostMapping("/register/v2")
-    ApiResponse<Boolean> registerUser(@RequestBody @Validated ApiRequest<User> user);
+    HttpApiResponse<Boolean> registerUser(@RequestBody @Validated HttpApiRequest<User> user);
 }

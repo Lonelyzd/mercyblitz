@@ -12,7 +12,7 @@ import java.util.Map;
  * @date : 2025/4/13 16:08
  **/
 @Data
-public class ApiBase<T> {
+public class HttpApi<T> {
 
     @Deprecated
     private Map<String, String> headers;
