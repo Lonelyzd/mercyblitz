@@ -1,6 +1,6 @@
 package com.acme.biz.web.mvc.method.annotation;
 
-import com.acme.biz.api.HttpApiResponse;
+import com.acme.biz.api.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.MediaType;
@@ -19,7 +19,7 @@ public class FlexibleResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class)
                 || returnType.hasMethodAnnotation(ResponseBody.class))
-                && !HttpApiResponse.class.isAssignableFrom(returnType.getParameterType());
+                && !ApiResponse.class.isAssignableFrom(returnType.getParameterType());
     }
 
     @Override
@@ -30,11 +30,11 @@ public class FlexibleResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return null;
         }
         if (body instanceof String) {
-            return HttpApiResponse.ok(body);
+            return ApiResponse.ok(body);
         }
-        if (body instanceof HttpApiResponse) {
+        if (body instanceof ApiResponse) {
             return body;
         }
-        return  HttpApiResponse.ok(body);
+        return  ApiResponse.ok(body);
     }
 }

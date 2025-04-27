@@ -1,6 +1,6 @@
 package com.acme.biz.web.mvc.exception;
 
-import com.acme.biz.api.HttpApiResponse;
+import com.acme.biz.api.ApiResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,11 +15,11 @@ import javax.validation.ValidationException;
 @RestControllerAdvice
 public class ExceptionConfiguration {
     @ExceptionHandler(ValidationException.class)
-    public HttpApiResponse<?> onValidationException(ValidationException e) {
-        return HttpApiResponse.failed(null, e.getLocalizedMessage());
+    public ApiResponse<?> onValidationException(ValidationException e) {
+        return ApiResponse.failed(null, e.getLocalizedMessage());
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public HttpApiResponse<?> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        return HttpApiResponse.failed(null, e.getLocalizedMessage());
+    public ApiResponse<?> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return ApiResponse.failed(null, e.getLocalizedMessage());
     }
 }

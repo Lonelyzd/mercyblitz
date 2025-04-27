@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  **/
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class HttpApiRequest<T> extends HttpApi<T> {
+public class ApiRequest<T> extends HttpApi<T> {
 
 
 }

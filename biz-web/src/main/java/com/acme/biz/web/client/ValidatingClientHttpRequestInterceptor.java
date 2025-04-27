@@ -1,5 +1,7 @@
 package com.acme.biz.web.client;
 
+import com.acme.biz.api.ApiResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -7,7 +9,9 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonInputMessage;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -25,11 +29,11 @@ import java.util.Set;
 public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
     private final Validator validator;
 
-    private final List<HttpMessageConverter<?>> converters;
+    private final HttpMessageConverter[] converters;
 
-    public ValidatingClientHttpRequestInterceptor(RestTemplate restTemplate, Validator validator) {
+    public ValidatingClientHttpRequestInterceptor(Validator validator, HttpMessageConverter... converters) {
         this.validator = validator;
-        this.converters = restTemplate.getMessageConverters();
+        this.converters = converters;
     }
 
     @Override
@@ -42,34 +46,45 @@ public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequest
         clientHttpResponse = execution.execute(request, body);
 
         //后置处理
-
-
         return afterExecution(request, body);
     }
 
     private void beforeExecution(HttpRequest request, byte[] body) {
-        final MappingJacksonInputMessage httpInputMessage = new MappingJacksonInputMessage(new ByteArrayInputStream(body), request.getHeaders());
+        validateBean(request, body);
+    }
 
-        Class<?> bodyClass = resovleBodyClass(httpInputMessage);
-        MediaType mediaType = resovleMediaType(httpInputMessage);
+    private void validateBean(HttpRequest request, byte[] body) {
 
-        for (HttpMessageConverter converter : this.converters) {
-            if (converter.canRead(bodyClass, mediaType)) {
-                try {
-                    Object bean = converter.read(bodyClass, httpInputMessage);
-                    Set<ConstraintViolation<Object>> violations = this.validator.validate(bean);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+        Class<?> bodyClass = resovleBodyClass(request.getHeaders());
+        if (bodyClass != null) {
+            final MappingJacksonInputMessage httpInputMessage = new MappingJacksonInputMessage(new ByteArrayInputStream(body), request.getHeaders());
+            MediaType mediaType = resovleMediaType(httpInputMessage);
+
+            for (HttpMessageConverter converter : this.converters) {
+                if (converter.canRead(bodyClass, mediaType)) {
+                    try {
+                        Object bean = converter.read(bodyClass, httpInputMessage);
+                        Set<ConstraintViolation<Object>> violations = this.validator.validate(bean);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
-
-
     }
 
 
-    private Class<?> resovleBodyClass(MappingJacksonInputMessage httpInputMessage) {
-        return null;
+    private Class<?> resovleBodyClass(HttpHeaders headers) {
+        // 临时传递 HTTP Header
+        final List<String> classes = headers.remove("body-class");
+        if (!ObjectUtils.isEmpty(classes)) {
+            final String bodyClassName = classes.get(0);
+            if (StringUtils.hasText(bodyClassName)) {
+                return ClassUtils.resolveClassName(bodyClassName, null);
+            }
+        }
+        return ApiResponse.class;
+
     }
 
     private MediaType resovleMediaType(MappingJacksonInputMessage httpInputMessage) {

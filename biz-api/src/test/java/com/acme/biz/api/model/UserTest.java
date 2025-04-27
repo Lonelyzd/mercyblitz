@@ -1,6 +1,6 @@
 package com.acme.biz.api.model;
 
-import com.acme.biz.api.HttpApiRequest;
+import com.acme.biz.api.ApiRequest;
 import com.acme.biz.api.BaseTest;
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +20,10 @@ public class UserTest  extends BaseTest {
         User user=new User();
 //        user.setName("aa");
 
-        HttpApiRequest<User> request = new HttpApiRequest<>();
+        ApiRequest<User> request = new ApiRequest<>();
         request.setBody(user);
 
-        final Set<ConstraintViolation<HttpApiRequest<User>>> constraintViolations = super.validate(request);
+        final Set<ConstraintViolation<ApiRequest<User>>> constraintViolations = super.validate(request);
 
         constraintViolations.forEach(cv->{
             System.out.println(cv.getPropertyPath()+":"+cv.getMessage());

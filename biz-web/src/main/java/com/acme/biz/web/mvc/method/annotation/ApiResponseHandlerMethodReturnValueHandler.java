@@ -1,6 +1,6 @@
 package com.acme.biz.web.mvc.method.annotation;
 
-import com.acme.biz.api.HttpApiResponse;
+import com.acme.biz.api.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ public class ApiResponseHandlerMethodReturnValueHandler implements HandlerMethod
     public boolean supportsReturnType(MethodParameter returnType) {
         return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class)
                 || returnType.hasMethodAnnotation(ResponseBody.class))
-                && !HttpApiResponse.class.isAssignableFrom(returnType.getParameterType());
+                && !ApiResponse.class.isAssignableFrom(returnType.getParameterType());
     }
 
     /**
@@ -45,7 +45,7 @@ public class ApiResponseHandlerMethodReturnValueHandler implements HandlerMethod
         //标记已被处理过
         mavContainer.setRequestHandled(true);
 
-        HttpApiResponse<?> apiResponse = HttpApiResponse.ok(returnValue);
+        ApiResponse<?> apiResponse = ApiResponse.ok(returnValue);
         final ServletServerHttpResponse httpOutputMessage = createOutputMessage(webRequest);
 
         converter.write(apiResponse, MediaType.APPLICATION_JSON, httpOutputMessage);
