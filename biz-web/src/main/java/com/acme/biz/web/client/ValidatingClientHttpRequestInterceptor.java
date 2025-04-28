@@ -46,7 +46,7 @@ public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequest
         clientHttpResponse = execution.execute(request, body);
 
         //后置处理
-        return afterExecution(request, body);
+        return afterExecution(clientHttpResponse);
     }
 
     private void beforeExecution(HttpRequest request, byte[] body) {
@@ -91,7 +91,7 @@ public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequest
         return httpInputMessage.getHeaders().getContentType();
     }
 
-    private ClientHttpResponse afterExecution(HttpRequest request, byte[] body) {
-        return null;
+    private ClientHttpResponse afterExecution(ClientHttpResponse response) {
+        return response;
     }
 }

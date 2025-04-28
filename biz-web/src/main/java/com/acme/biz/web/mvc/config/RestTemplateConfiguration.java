@@ -36,7 +36,6 @@ public class RestTemplateConfiguration {
         ClientHttpRequestFactory requestFactory = buildClientHttpRequestFactory(interceptors);
 
         restTemplate.setRequestFactory(requestFactory);
-
         //TODO 增加 ResponseErrorHandler
         return restTemplate;
     }
