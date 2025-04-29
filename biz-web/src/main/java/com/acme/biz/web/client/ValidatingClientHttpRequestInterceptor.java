@@ -1,7 +1,10 @@
 package com.acme.biz.web.client;
 
-import com.acme.biz.api.ApiResponse;
+import com.acme.biz.api.ApiRequest;
+import com.acme.biz.api.model.User;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -26,10 +29,11 @@ import java.util.Set;
  * @author : IceBlue
  * @date : 2025/4/26 21:38
  **/
-public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequestInterceptor, Ordered {
     private final Validator validator;
 
     private final HttpMessageConverter[] converters;
+    public static final String CLASS_NAME ="body-class";
 
     public ValidatingClientHttpRequestInterceptor(Validator validator, HttpMessageConverter... converters) {
         this.validator = validator;
@@ -38,60 +42,77 @@ public class ValidatingClientHttpRequestInterceptor implements ClientHttpRequest
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        ClientHttpResponse clientHttpResponse = null;
-        //前置处理
-        beforeExecution(request, body);
-
-        //请求处理
-        clientHttpResponse = execution.execute(request, body);
-
-        //后置处理
-        return afterExecution(clientHttpResponse);
+        ClientHttpResponse response = null;
+        // 前置处理
+        boolean valid = beforeExecute(request, body);
+        HttpHeaders headers = request.getHeaders();
+        headers.add("validation-result", Boolean.toString(valid));
+        // 请求处理 (next interceptor)
+        response = execution.execute(request, body);
+        // 后置处理
+        return afterExecute(response);
     }
 
-    private void beforeExecution(HttpRequest request, byte[] body) {
-        validateBean(request, body);
+    private ClientHttpResponse handleError(HttpRequest request, byte[] body) {
+        return null;
     }
 
-    private void validateBean(HttpRequest request, byte[] body) {
+    private boolean beforeExecute(HttpRequest request, byte[] body) {
+        return validateBean(request, body);
+    }
 
-        Class<?> bodyClass = resovleBodyClass(request.getHeaders());
+    private boolean validateBean(HttpRequest request, byte[] body) {
+        // FastJSON auto-type
+        Class<?> bodyClass = resolveBodyClass(request.getHeaders());
         if (bodyClass != null) {
-            final MappingJacksonInputMessage httpInputMessage = new MappingJacksonInputMessage(new ByteArrayInputStream(body), request.getHeaders());
-            MediaType mediaType = resovleMediaType(httpInputMessage);
-
-            for (HttpMessageConverter converter : this.converters) {
+            HttpInputMessage httpInputMessage = new MappingJacksonInputMessage(new ByteArrayInputStream(body), request.getHeaders());
+            MediaType mediaType = resolveMediaType(httpInputMessage);
+            for (HttpMessageConverter converter : converters) {
                 if (converter.canRead(bodyClass, mediaType)) {
                     try {
                         Object bean = converter.read(bodyClass, httpInputMessage);
-                        Set<ConstraintViolation<Object>> violations = this.validator.validate(bean);
-                    } catch (Exception e) {
+                        ApiRequest<User> userApiRequest = new ApiRequest<>();
+                        userApiRequest.setBody(new User());
+
+                        Set<ConstraintViolation<Object>> violations = validator.validate(bean);
+                        if (!violations.isEmpty()) {
+                            return false;
+                        }
+                        // TODO
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
         }
+        return true;
     }
 
-
-    private Class<?> resovleBodyClass(HttpHeaders headers) {
+    private Class<?> resolveBodyClass(HttpHeaders httpHeaders) {
         // 临时传递 HTTP Header
-        final List<String> classes = headers.remove("body-class");
+        List<String> classes = httpHeaders.remove(CLASS_NAME);
         if (!ObjectUtils.isEmpty(classes)) {
-            final String bodyClassName = classes.get(0);
+            String bodyClassName = classes.get(0);
             if (StringUtils.hasText(bodyClassName)) {
                 return ClassUtils.resolveClassName(bodyClassName, null);
             }
         }
-        return ApiResponse.class;
-
+        return null;
     }
 
-    private MediaType resovleMediaType(MappingJacksonInputMessage httpInputMessage) {
-        return httpInputMessage.getHeaders().getContentType();
+
+    private MediaType resolveMediaType(HttpInputMessage httpInputMessage) {
+        HttpHeaders httpHeaders = httpInputMessage.getHeaders();
+        return httpHeaders.getContentType();
     }
 
-    private ClientHttpResponse afterExecution(ClientHttpResponse response) {
+    private ClientHttpResponse afterExecute(ClientHttpResponse response) {
+        // TODO
         return response;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 }
